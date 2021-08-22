@@ -23,9 +23,24 @@ public class PathFinder : MonoBehaviour
             MazeCell selectedObj = SelectCell();
             if (selectedObj) 
             {
-                // Deslect previous cell if there is one assigned
-                if (startCell) { startCell.ground.material = startCell.revisitedMat; }
+                // Can't place the start cell ontop of the endcell
+                if (selectedObj == endCell) { return; }
 
+                // Deselect the endcell if we click on it again
+                if (selectedObj == startCell)
+                {
+                    startCell.ground.material = startCell.revisitedMat;
+                    startCell = null;
+                    ResetPath();
+                    return;
+                }
+                else if (startCell)
+                {
+                    // Deslect previous cell if there is one assigned
+                    startCell.ground.material = startCell.revisitedMat;
+                }
+
+                // Cell is not yet selected so select it.
                 ResetPath();
                 startCell = selectedObj;
                 startCell.ground.material = startMat;
@@ -38,9 +53,23 @@ public class PathFinder : MonoBehaviour
             MazeCell selectedObj = SelectCell();
             if (selectedObj)
             {
-                // Deslect previous cell if there is one assigned
-                if (endCell) { endCell.ground.material = endCell.revisitedMat; }
+                // Can't place the end cell ontop of the start cell
+                if (selectedObj == startCell) { return; }
 
+                // Deselect the endcell if we click on it again
+                if (selectedObj == endCell)
+                {
+                    endCell.ground.material = endCell.revisitedMat;
+                    endCell = null;
+                    ResetPath();
+                    return;
+                } else if (endCell)
+                {
+                    // Deslect previous cell if there is one assigned
+                    endCell.ground.material = endCell.revisitedMat;
+                }
+
+                // Cell is not yet selected so select it.
                 ResetPath();
                 endCell = selectedObj;
                 endCell.ground.material = endMat;
@@ -95,9 +124,9 @@ public class PathFinder : MonoBehaviour
     /// <returns>List of cells which make the path</returns>
     internal List<MazeCell> FindPath(MazeCell startCell, MazeCell endCell)
     {
-        if (startCell == null && endCell == null)
+        if (startCell == null || endCell == null)
         {
-            Debug.LogWarning("Unable to find the path with the assigned location variables!");
+            Debug.LogError("Unable to find the path with the assigned location variables!");
             return null;
         }
 
