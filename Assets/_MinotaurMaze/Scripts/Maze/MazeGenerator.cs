@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,11 +6,16 @@ using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
 {
+    public static event Action GenerationFinished;
+
     [Header("Grid Generation")]
-    private int gridWidth = 30;
-    private int gridHeight = 20;
-    private float cellMargin = 0.2f;
+    private int gridWidth = 10;
+    private int gridHeight = 10;
+    private float cellMargin = 0f;
     private float cellWidth = 1;
+    public float generateDelay = 0;
+
+    internal bool finishedGeneration;
 
     public Transform mazeParent;
     public Transform cellParent;
@@ -18,8 +24,6 @@ public class MazeGenerator : MonoBehaviour
     private MazeCell[][] cells;
     private List<MazeCell> generatedPath;
     private Vector2[] directions = new Vector2[] { Vector2.up, Vector2.right, Vector2.down, Vector2.left }; // N, E, S, W
-
-    public Material revisitedMat;
 
     /// <summary>
     /// Method to generate a new maze
@@ -65,6 +69,8 @@ public class MazeGenerator : MonoBehaviour
     /// </summary>
     private void CreateCells()
     {
+        finishedGeneration = false;
+
         Debug.Log($"Generating grid... \n - Width: {gridWidth} \n - Height: {gridHeight} ");
         for (int r = 0; r < gridWidth; r++)
         {
@@ -91,60 +97,62 @@ public class MazeGenerator : MonoBehaviour
     /// </summary>
     private void GenerateMaze()
     {
-        MazeCell startCell = cells[10][10];
+        MazeCell startCell = cells[0][0];
 
-        //CheckCell(startCell);
-        StartCoroutine(DelayCheckCell(startCell));
-    }
-
-    /// <summary>
-    /// Method to delay the Cell check for debug purposes
-    /// </summary>
-    /// <param name="currentCell"></param>
-    private IEnumerator DelayCheckCell(MazeCell currentCell)
-    {
-        yield return new WaitForSeconds(0.02f);
-        CheckCell(currentCell);
+        StartCoroutine(CheckCell(startCell));
     }
 
     /// <summary>
     /// Method to check for a new neighbor to go towards
     /// </summary>
     /// <param name="currentCell">The current cell that is being checked for neighbors</param>
-    private void CheckCell(MazeCell currentCell)
+    private IEnumerator CheckCell(MazeCell currentCell)
     {
+        yield return new WaitForSeconds(generateDelay);
+
         // Add the cell to the list if this is a new cell
         if (currentCell.visited == false)
         {
-            currentCell.SetVisited(true);
             generatedPath.Add(currentCell);
         } else
         {
             // If this is not a new cell then we backtracked so remove him from the list.
             generatedPath.Remove(currentCell);
-            currentCell.ground.material = revisitedMat;
 
             if (generatedPath.Count == 0)
             {
-                // We have no cells to check anymore!
+                // We are back to out starting point
                 Debug.Log("Generation has been finished!");
-                return;
+                finishedGeneration = true;
+                GenerationFinished?.Invoke();
+                currentCell.SetVisited(true);
+                yield break;
             }
         }
 
+        currentCell.SetVisited(true);
+        CheckNeighbor(currentCell);
+    }
+
+    /// <summary>
+    /// Method to check if there is an available neighbor to go towards
+    /// </summary>
+    /// <param name="currentCell">The current cell that is being checked for neighbors</param>
+    private void CheckNeighbor(MazeCell currentCell)
+    {
         // Pick random unvisited neighbor, leave all directions open to check
         MazeCell randomNeighbor = GetRandomUnvisitedNeighbor(currentCell, directions);
         if (randomNeighbor == null)
         {
             // Go back the previous cell to check if this one still has unvisited neighbors
-            //CheckCell(generatedPath[generatedPath.Count - 1]);
-            StartCoroutine(DelayCheckCell(generatedPath[generatedPath.Count - 1]));
+            StartCoroutine(CheckCell(generatedPath[generatedPath.Count - 1]));
         }
         else
         {
             // This cell has not been visited yet, continue
-            //CheckCell(randomNeighbor);
-            StartCoroutine(DelayCheckCell(randomNeighbor));
+            currentCell.AddNeighbor(randomNeighbor);
+            randomNeighbor.AddNeighbor(currentCell);
+            StartCoroutine(CheckCell(randomNeighbor));
         }
     }
 
@@ -161,7 +169,7 @@ public class MazeGenerator : MonoBehaviour
 
         // Get a random available direction
         List<Vector2> availableDirections = availableDirs.ToList();
-        int randomIndex = Random.Range(0, availableDirections.Count);
+        int randomIndex = UnityEngine.Random.Range(0, availableDirections.Count);
         Vector2 dir = directions[randomIndex];
         availableDirections.RemoveAt(randomIndex);
 
@@ -196,7 +204,7 @@ public class MazeGenerator : MonoBehaviour
     /// <summary>
     /// Method to set the dimensions of the maze
     /// </summary>
-    /// <param name="dimensions"></param>
+    /// <param name="dimensions">The new dimensions of the maze</param>
     internal void SetMazeDimensions(Vector2 dimensions, float margin)
     {
         gridWidth = (int)dimensions.x;

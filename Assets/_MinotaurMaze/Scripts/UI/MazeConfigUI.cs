@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ using UnityEngine.UI;
 public class MazeConfigUI : MonoBehaviour
 {
     public MazeGenerator generator;
+    public PathFinder pathFinder;
     public RectTransform rect;
     private bool isOpen = true;
 
@@ -20,8 +22,24 @@ public class MazeConfigUI : MonoBehaviour
     public InputField mazeHeight;
     public InputField mazeMargin;
 
+    [Header("Buttons")]
+    public Button generateButton;
+    public Button findPathButton;
+
+    private void Awake()
+    {
+        MazeGenerator.GenerationFinished += OnGenerationFinished;
+    }
+
+    private void OnDestroy()
+    {
+        MazeGenerator.GenerationFinished -= OnGenerationFinished;
+    }
+
     private void Start()
     {
+        findPathButton.interactable = false;
+
         Vector2 d = generator.GetMazeDimensions();
         mazeWidth.text = d.x.ToString();
         mazeHeight.text = d.y.ToString();
@@ -84,5 +102,25 @@ public class MazeConfigUI : MonoBehaviour
         float m = float.Parse(mazeMargin.text);
         generator.SetMazeDimensions(d, m);
         generator.CreateMaze();
+
+        pathFinder.path = null;
+
+        generateButton.interactable = false;
+        findPathButton.interactable = false;
     }
+
+    /// <summary>
+    /// Method to start the pathfinder
+    /// </summary>
+    public void FindPath() { pathFinder.FindPath(); }
+
+    /// <summary>
+    /// Method which gets called once the generation has been finished which toggles everything on again
+    /// </summary>
+    private void OnGenerationFinished()
+    {
+        generateButton.interactable = true;
+        findPathButton.interactable = true;
+    }
+
 }

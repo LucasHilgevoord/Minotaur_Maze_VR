@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 491276427212527776}
   - component: {fileID: -6051827976093062040}
+  - component: {fileID: 8046608066230291360}
   m_Layer: 0
   m_Name: MazeCell
   m_TagString: Untagged
@@ -50,11 +51,26 @@ MonoBehaviour:
   visited: 0
   debugText: {fileID: 7824369970057039965}
   visitedMat: {fileID: 2100000, guid: 47214939954b9244da91f7fc2ab8c0f7, type: 2}
+  revisitedMat: {fileID: 2100000, guid: be66542c3e101af4f818c81e9e8003b9, type: 2}
+  pathMat: {fileID: 2100000, guid: efe09ebbc09af6d4b8c3922a597954a1, type: 2}
   ground: {fileID: 6698294191412600782}
   topWall: {fileID: 2594606036481774717}
   rightWall: {fileID: 6642397347442932735}
   bottomWall: {fileID: 3252008397749930518}
   leftWall: {fileID: 8739316897134089689}
+--- !u!65 &8046608066230291360
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491276427212527780}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2589958297453786501
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +306,7 @@ GameObject:
   - component: {fileID: 8928999807978819564}
   - component: {fileID: 770193713120253377}
   - component: {fileID: 6698294191412600782}
-  - component: {fileID: 8121616710278328084}
+  - component: {fileID: 2778065136665093574}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -361,8 +377,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8121616710278328084
-MeshCollider:
+--- !u!65 &2778065136665093574
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -371,10 +387,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  serializedVersion: 2
+  m_Size: {x: 10, y: 2.220446e-16, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5867814433892613748
 GameObject:
   m_ObjectHideFlags: 0
